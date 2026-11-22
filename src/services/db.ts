@@ -149,6 +149,9 @@ function recomputeOrderActiveAmount(order: Order): number {
 // INITIALIZATION, RESET & EXPORT
 // ============================================================================
 
+const CATALOG_VERSION_KEY = 'cocs_catalog_version';
+const CURRENT_CATALOG_VERSION = 'v2_inr_12unique';
+
 export async function initDatabase(): Promise<void> {
   const existingUsers = localStorage.getItem(STORAGE_KEYS.USERS);
   const existingProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
@@ -162,24 +165,54 @@ export async function initDatabase(): Promise<void> {
     writeJson(STORAGE_KEYS.AUDIT_LOG, seed.auditLogs);
     writeJson(STORAGE_KEYS.NOTIFICATIONS, seed.notifications);
     writeJson(STORAGE_KEYS.SETTINGS, seed.settings);
+    localStorage.setItem(CATALOG_VERSION_KEY, CURRENT_CATALOG_VERSION);
   } else {
     if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
       writeJson(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
     }
-    // Non-destructively replace legacy '$' symbols in persisted audit/notification copy with '₹'
-    const logs = readJson<AuditLogEntry[]>(STORAGE_KEYS.AUDIT_LOG, []);
-    if (logs.some((l) => /\$\d/.test(l.details))) {
-      writeJson(
-        STORAGE_KEYS.AUDIT_LOG,
-        logs.map((l) => ({ ...l, details: l.details.replace(/\$(\d)/g, '₹$1') }))
+
+    // One-time upgrade for browsers holding the older v1 USD-priced / duplicate-image seed items
+    if (localStorage.getItem(CATALOG_VERSION_KEY) !== CURRENT_CATALOG_VERSION) {
+      const seed = buildSeedDataset();
+
+      // Replace only the 12 seeded products (prod-01..prod-12), keeping any admin-created products
+      const currentProducts = readJson<Product[]>(STORAGE_KEYS.PRODUCTS, []);
+      const customProducts = currentProducts.filter(
+        (p) => !seed.products.some((sp) => sp.id === p.id)
       );
-    }
-    const notifs = readJson<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
-    if (notifs.some((n) => /\$\d/.test(n.message))) {
-      writeJson(
-        STORAGE_KEYS.NOTIFICATIONS,
-        notifs.map((n) => ({ ...n, message: n.message.replace(/\$(\d)/g, '₹$1') }))
-      );
+      writeJson(STORAGE_KEYS.PRODUCTS, [...customProducts, ...seed.products]);
+
+      // Replace only the 8 seeded demo orders/payments/cancellations, preserving custom user orders
+      const seedOrderIds = new Set(seed.orders.map((o) => o.id));
+      const currentOrders = readJson<Order[]>(STORAGE_KEYS.ORDERS, []);
+      const customOrders = currentOrders.filter((o) => !seedOrderIds.has(o.id));
+      writeJson(STORAGE_KEYS.ORDERS, [...customOrders, ...seed.orders]);
+
+      const seedPayIds = new Set(seed.payments.map((p) => p.id));
+      const currentPayments = readJson<Payment[]>(STORAGE_KEYS.PAYMENTS, []);
+      const customPayments = currentPayments.filter((p) => !seedPayIds.has(p.id));
+      writeJson(STORAGE_KEYS.PAYMENTS, [...customPayments, ...seed.payments]);
+
+      const seedCancelIds = new Set(seed.cancellations.map((c) => c.id));
+      const currentCancels = readJson<Cancellation[]>(STORAGE_KEYS.CANCELLATIONS, []);
+      const customCancels = currentCancels.filter((c) => !seedCancelIds.has(c.id));
+      writeJson(STORAGE_KEYS.CANCELLATIONS, [...customCancels, ...seed.cancellations]);
+
+      const seedAuditIds = new Set(seed.auditLogs.map((a) => a.id));
+      const currentLogs = readJson<AuditLogEntry[]>(STORAGE_KEYS.AUDIT_LOG, []);
+      const customLogs = currentLogs
+        .filter((l) => !seedAuditIds.has(l.id))
+        .map((l) => ({ ...l, details: l.details.replace(/\$(\d)/g, '₹$1') }));
+      writeJson(STORAGE_KEYS.AUDIT_LOG, [...customLogs, ...seed.auditLogs]);
+
+      const seedNotifIds = new Set(seed.notifications.map((n) => n.id));
+      const currentNotifs = readJson<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
+      const customNotifs = currentNotifs
+        .filter((n) => !seedNotifIds.has(n.id))
+        .map((n) => ({ ...n, message: n.message.replace(/\$(\d)/g, '₹$1') }));
+      writeJson(STORAGE_KEYS.NOTIFICATIONS, [...customNotifs, ...seed.notifications]);
+
+      localStorage.setItem(CATALOG_VERSION_KEY, CURRENT_CATALOG_VERSION);
     }
   }
 }
@@ -198,6 +231,7 @@ export async function resetDemoData(actor: User): Promise<void> {
   writeJson(STORAGE_KEYS.AUDIT_LOG, seed.auditLogs);
   writeJson(STORAGE_KEYS.NOTIFICATIONS, seed.notifications);
   writeJson(STORAGE_KEYS.SETTINGS, seed.settings);
+  localStorage.setItem(CATALOG_VERSION_KEY, CURRENT_CATALOG_VERSION);
 
   // Clear customer carts on demo reset
   Object.keys(localStorage).forEach((k) => {

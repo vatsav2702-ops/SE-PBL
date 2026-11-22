@@ -36,7 +36,7 @@ export function CartPage({ onGoToShop, onViewOrder }: CartPageProps) {
   const [loading, setLoading] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CARD);
   const [shippingAddress, setShippingAddress] = useState(
-    '742 Market Street, Apt 4B, San Francisco, CA 94103'
+    '742 Indiranagar 100 Feet Road, Bengaluru, KA 560038'
   );
   const [formError, setFormError] = useState('');
   const [placing, setPlacing] = useState(false);

@@ -10,28 +10,52 @@ import { ProductImage } from '../../components/ProductImage';
 
 const DEFAULT_STUDIO_IMAGES = [
   {
-    label: 'Headphones Studio',
+    label: 'Wireless ANC Headphones',
     url: '/src/assets/images/product_anc_headphones_1795186138011.jpg',
   },
   {
-    label: 'Mechanical Keyboard',
+    label: 'Portable Bluetooth Speaker',
+    url: '/src/assets/images/product_bluetooth_speaker_1795327108367.jpg',
+  },
+  {
+    label: 'Aluminum Mechanical Keyboard',
     url: '/src/assets/images/product_mech_keyboard_1795186100168.jpg',
   },
   {
-    label: 'Architectural Lamp',
+    label: 'Ergonomic Wireless Mouse',
+    url: '/src/assets/images/product_wireless_mouse_1795327109156.jpg',
+  },
+  {
+    label: 'Architectural LED Desk Lamp',
     url: '/src/assets/images/product_desk_lamp_1795186068827.jpg',
   },
   {
-    label: 'Titanium Watch',
+    label: 'Knit Running Shoes',
+    url: '/src/assets/images/product_running_shoes_1795327108281.jpg',
+  },
+  {
+    label: 'Titanium Smartwatch',
     url: '/src/assets/images/product_titanium_watch_1795186072522.jpg',
   },
   {
-    label: 'Commuter Backpack',
+    label: 'Pro Tablet & Stylus',
+    url: '/src/assets/images/product_pro_tablet_1795327106213.jpg',
+  },
+  {
+    label: 'Waterproof Tech Backpack',
     url: '/src/assets/images/product_tech_backpack_1795186073105.jpg',
   },
   {
-    label: 'Pour-Over Kettle',
+    label: 'Hardshell Cabin Suitcase',
+    url: '/src/assets/images/product_cabin_suitcase_1795327108954.jpg',
+  },
+  {
+    label: 'Gooseneck Pour-Over Kettle',
     url: '/src/assets/images/product_pourover_kettle_1795186068450.jpg',
+  },
+  {
+    label: 'Compact Espresso Machine',
+    url: '/src/assets/images/product_espresso_machine_1795327109084.jpg',
   },
 ];
 
