@@ -97,11 +97,11 @@ export function ReportsPage() {
       'Email',
       'Order Status',
       'Payment Method',
-      'Total Amount',
+      'Total Amount (INR)',
       'Cancellation ID',
       'Cancellation Reason',
       'Cancellation Status',
-      'Refund Amount',
+      'Refund Amount (INR)',
       'Refund Status',
     ];
 

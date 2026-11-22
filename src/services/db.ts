@@ -162,8 +162,25 @@ export async function initDatabase(): Promise<void> {
     writeJson(STORAGE_KEYS.AUDIT_LOG, seed.auditLogs);
     writeJson(STORAGE_KEYS.NOTIFICATIONS, seed.notifications);
     writeJson(STORAGE_KEYS.SETTINGS, seed.settings);
-  } else if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
-    writeJson(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
+  } else {
+    if (!localStorage.getItem(STORAGE_KEYS.SETTINGS)) {
+      writeJson(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
+    }
+    // Non-destructively replace legacy '$' symbols in persisted audit/notification copy with '₹'
+    const logs = readJson<AuditLogEntry[]>(STORAGE_KEYS.AUDIT_LOG, []);
+    if (logs.some((l) => /\$\d/.test(l.details))) {
+      writeJson(
+        STORAGE_KEYS.AUDIT_LOG,
+        logs.map((l) => ({ ...l, details: l.details.replace(/\$(\d)/g, '₹$1') }))
+      );
+    }
+    const notifs = readJson<AppNotification[]>(STORAGE_KEYS.NOTIFICATIONS, []);
+    if (notifs.some((n) => /\$\d/.test(n.message))) {
+      writeJson(
+        STORAGE_KEYS.NOTIFICATIONS,
+        notifs.map((n) => ({ ...n, message: n.message.replace(/\$(\d)/g, '₹$1') }))
+      );
+    }
   }
 }
 
@@ -409,7 +426,7 @@ export async function createProduct(
     throw new Error('Only administrators can create products.');
   }
   if (!input.name.trim()) throw new Error('Product name is required.');
-  if (input.price <= 0) throw new Error('Product price must be greater than $0.');
+  if (input.price <= 0) throw new Error('Product price must be greater than ₹0.');
   if (input.stock < 0 || !Number.isInteger(input.stock)) {
     throw new Error('Stock must be a non-negative whole number.');
   }
@@ -454,7 +471,7 @@ export async function updateProduct(
   if (idx === -1) throw new Error('Product not found.');
 
   if (updates.price !== undefined && updates.price <= 0) {
-    throw new Error('Product price must be greater than $0.');
+    throw new Error('Product price must be greater than ₹0.');
   }
   if (updates.stock !== undefined && (updates.stock < 0 || !Number.isInteger(updates.stock))) {
     throw new Error('Stock cannot be negative and must be a whole number.');

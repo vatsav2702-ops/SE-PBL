@@ -114,7 +114,7 @@ export function ManageProductsPage() {
       return;
     }
     if (isNaN(parsedPrice) || parsedPrice <= 0) {
-      setFormError('Enter a valid price greater than $0.');
+      setFormError('Enter a valid price greater than ₹0.');
       return;
     }
     if (isNaN(parsedStock) || parsedStock < 0 || !Number.isInteger(parsedStock)) {
@@ -415,7 +415,7 @@ export function ManageProductsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700">
-                    Price (USD) *
+                    Price (INR) *
                   </label>
                   <input
                     type="number"
